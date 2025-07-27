@@ -10,6 +10,13 @@
   <p id="result" style="margin-top:20px;"></p>
 
   <script>
+    // Function to speak text using browser
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      speechSynthesis.speak(utterance);
+    }
+
+    // On button click, start speech recognition
     document.getElementById('voice-btn').onclick = function () {
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.lang = 'en-US';
@@ -30,10 +37,17 @@
             let hospitalMsg = data.hospitals.includes("Error") || data.hospitals === '' ?
               "⚠️ Unable to fetch nearby hospitals." :
               `🏥 Nearby Hospitals:\n${data.hospitals}`;
+            
+            // Speak the result
+            let spokenMessage = `The predicted disease is ${data.disease}. Remedy: ${data.remedy}.`;
+            speak(spokenMessage);
+
+            // Also show the result in alert box
             alert(`🧠 Disease: ${data.disease}\n💊 Remedy: ${data.remedy}\n${hospitalMsg}`);
           });
         }
 
+        // Geolocation
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             position => sendToServer(position.coords.latitude, position.coords.longitude),
