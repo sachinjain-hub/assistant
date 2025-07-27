@@ -3,6 +3,7 @@ from utils.text_to_speech import text_to_speech
 from utils.hospital_locator import find_nearest_hospitals
 import pickle
 import pandas as pd
+import os
 
 # Load model and vectorizer
 model = pickle.load(open('model/disease_model.pkl', 'rb'))
@@ -43,4 +44,5 @@ def get_remedy(disease):
     return remedy
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
