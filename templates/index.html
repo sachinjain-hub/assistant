@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Doctor Assistant</title>
+</head>
+<body style="text-align:center; font-family:sans-serif; background:#e0f7fa; padding-top:50px;">
+  <h1>🩺 Voice Doctor Assistant</h1>
+  <button id="voice-btn" style="padding:15px 30px; font-size:16px;">🎙 Speak Symptoms</button>
+  <p id="result" style="margin-top:20px;"></p>
+
+  <script>
+    document.getElementById('voice-btn').onclick = function () {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.start();
+
+      recognition.onresult = function (event) {
+        const symptom = event.results[0][0].transcript;
+        document.getElementById('result').innerText = "🗣️ You said: " + symptom;
+
+        function sendToServer(lat = '', lon = '') {
+          fetch('/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `symptom=${encodeURIComponent(symptom)}&lat=${lat}&lon=${lon}`
+          })
+          .then(res => res.json())
+          .then(data => {
+            let hospitalMsg = data.hospitals.includes("Error") || data.hospitals === '' ?
+              "⚠️ Unable to fetch nearby hospitals." :
+              `🏥 Nearby Hospitals:\n${data.hospitals}`;
+            alert(`🧠 Disease: ${data.disease}\n💊 Remedy: ${data.remedy}\n${hospitalMsg}`);
+          });
+        }
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            position => sendToServer(position.coords.latitude, position.coords.longitude),
+            error => {
+              console.warn("Geolocation error:", error);
+              sendToServer(); // fallback
+            }
+          );
+        } else {
+          alert("⚠️ Geolocation not supported.");
+          sendToServer();
+        }
+      };
+    };
+  </script>
+</body>
+</html>
