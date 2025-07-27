@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify
-from utils.text_to_speech import text_to_speech
 from utils.hospital_locator import find_nearest_hospitals
 import pickle
 import pandas as pd
